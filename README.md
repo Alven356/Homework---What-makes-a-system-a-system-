@@ -1,3 +1,5 @@
+Homework Report
+--------------------------------------------------
 # Behavior Improved & Update Journal
 
 ## B1 — Reframing the Project Around Its Research Question
@@ -12,6 +14,8 @@ I also consolidated the previously separated screens into a single continuous ar
 
 Finally, I removed or simplified animations that made the project feel overly playful or application-like. The remaining interactions now serve specific analytical purposes: they reveal annotations, compare system logic, and support the paper’s argument. This revision helped transform the project from an interactive showcase into a more focused and formal interactive research paper.
 
+Project Content
+------------------------------------------------------
 
 # What Makes a System a System?
 
