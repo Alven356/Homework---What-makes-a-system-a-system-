@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive paper about two valid system models and the relationships they create between users and machines.">
+  <title>Two System Logics — An Interactive Paper</title>
+  <style>
+    :root {
+      --ink: #172019;
+      --muted: #697269;
+      --paper: #f2f0e9;
+      --panel: #faf9f5;
+      --line: #d9d8cf;
+      --green: #23684b;
+      --green-soft: #dcebe1;
+      --orange: #d85f38;
+      --orange-soft: #f6ded4;
+      --blue: #3769b0;
+      --blue-soft: #dde7f6;
+      --purple: #7656a8;
+      --purple-soft: #e9e1f2;
+      --shadow: 0 22px 65px rgba(35, 42, 36, .11);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(216, 95, 56, .09), transparent 25rem),
+        linear-gradient(var(--paper), var(--paper));
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid rgba(55, 105, 176, .35); outline-offset: 3px; }
+
+    .intro {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 42px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .intro::after {
+      content: "";
+      position: absolute;
+      width: 430px; height: 430px;
+      border: 1px solid rgba(23, 32, 25, .12);
+      border-radius: 50%;
+      right: -190px; bottom: -190px;
+      box-shadow: 0 0 0 72px rgba(23, 32, 25, .025), 0 0 0 144px rgba(23, 32, 25, .018);
+    }
+    .intro-inner { width: min(960px, 100%); position: relative; z-index: 1; }
+    .eyebrow {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--green); font-size: 12px; font-weight: 760; letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; }
+    h1 { margin: 38px 0 26px; max-width: 850px; font-size: clamp(48px, 8vw, 108px); line-height: .96; letter-spacing: -.065em; font-weight: 700; }
+    h1 span { color: var(--orange); }
+    .intro-copy { max-width: 700px; font-size: clamp(18px, 2.2vw, 24px); line-height: 1.65; color: #4e574f; }
+    .intro-copy strong { color: var(--ink); font-weight: 680; }
+    .start-row { margin-top: 46px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+    .primary {
+      border: 0; color: white; background: var(--ink); padding: 15px 22px; border-radius: 999px;
+      cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 16px;
+      transition: transform .2s, background .2s;
+    }
+    .primary:hover { transform: translateY(-2px); background: var(--green); }
+    .primary i { font-style: normal; font-size: 20px; }
+    .start-note { color: var(--muted); font-size: 13px; }
+
+    .app { display: none; min-height: 100svh; padding: 18px; }
+    .app.active { display: block; animation: fadeUp .55s ease both; }
+    .shell { min-height: calc(100svh - 36px); border: 1px solid var(--line); border-radius: 28px; background: rgba(250,249,245,.82); box-shadow: var(--shadow); overflow: hidden; }
+    .topbar { height: 64px; padding: 0 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .brand { font-weight: 760; letter-spacing: -.02em; display: flex; gap: 10px; align-items: center; }
+    .brand-mark { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); box-shadow: 15px 0 0 var(--green); margin-right: 15px; }
+    .progress { display: flex; align-items: center; gap: 8px; }
+    .progress-dot { width: 26px; height: 5px; border-radius: 9px; background: #deded7; transition: background .3s, width .3s; }
+    .progress-dot.done { background: var(--green); }
+    .progress-dot.current { width: 42px; background: var(--orange); }
+    .counter { font-size: 12px; color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+    .workspace { min-height: calc(100svh - 102px); display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(340px, .65fr); }
+    .desk { padding: clamp(28px, 4.5vw, 68px); border-right: 1px solid var(--line); position: relative; overflow: hidden; }
+    .desk-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+    .kicker { color: var(--orange); font-weight: 760; font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
+    h2 { margin: 10px 0 0; font-size: clamp(30px, 4vw, 56px); letter-spacing: -.045em; line-height: 1.04; }
+    .time { text-align: right; font-size: 12px; color: var(--muted); }
+    .time strong { display: block; font-size: 25px; color: var(--ink); font-weight: 520; }
+    .prompt { margin: 32px 0 22px; padding: 14px 16px; background: white; border: 1px solid var(--line); border-radius: 14px; color: #4f5951; line-height: 1.55; font-size: 14px; display: flex; align-items: center; gap: 11px; }
+    .prompt b { width: 22px; height: 22px; display: grid; place-items: center; flex: none; border-radius: 50%; background: var(--green-soft); color: var(--green); }
+
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .task-card {
+      min-height: 190px; padding: 22px; text-align: left; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.8);
+      cursor: pointer; position: relative; overflow: hidden; transition: transform .22s, box-shadow .22s, border-color .22s;
+    }
+    .task-card:hover { transform: translateY(-4px); box-shadow: 0 13px 26px rgba(34,42,36,.08); border-color: #b9bdb5; }
+    .task-card.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+    .task-card.visited::after { content: "OBSERVED ✓"; position: absolute; right: 16px; top: 16px; color: var(--green); font-size: 11px; font-weight: 750; }
+    .app-icon { width: 50px; height: 50px; border-radius: 15px; display: grid; place-items: center; margin-bottom: 30px; color: var(--ink); position: relative; }
+    .app-icon::before, .app-icon::after { content: ""; position: absolute; }
+    .file-icon { background: var(--orange-soft); }
+    .file-icon::before { width: 22px; height: 26px; border: 2px solid var(--orange); border-radius: 3px; }
+    .file-icon::after { width: 12px; height: 2px; background: var(--orange); box-shadow: 0 6px 0 var(--orange); }
+    .device-icon { background: var(--blue-soft); }
+    .device-icon::before { width: 25px; height: 18px; border: 2px solid var(--blue); border-radius: 7px; }
+    .device-icon::after { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
+    .data-icon { background: var(--purple-soft); }
+    .data-icon::before { width: 25px; height: 9px; border: 2px solid var(--purple); border-radius: 50%; box-shadow: 0 7px 0 -2px var(--purple), 0 14px 0 -2px var(--purple); top: 13px; }
+    .code-icon { background: var(--green-soft); }
+    .code-icon::before { content: "{ }"; color: var(--green); font-weight: 800; font-family: ui-monospace, monospace; }
+    .task-card h3 { margin: 0; font-size: 19px; letter-spacing: -.02em; }
+    .task-card p { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+
+    .annotation { padding: 32px; background: #f7f6f1; display: flex; flex-direction: column; }
+    .annotation-label { display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); font-size: 10px; font-weight: 760; }
+    .annotation-label span:last-child { letter-spacing: 0; color: var(--orange); }
+    .annotation h3 { margin: 30px 0 12px; font-size: clamp(26px, 3vw, 40px); line-height: 1.12; letter-spacing: -.04em; }
+    .annotation-copy { color: #566057; line-height: 1.65; font-size: 14px; min-height: 70px; }
+    .result-box { margin-top: 22px; padding: 16px; border-left: 3px solid var(--orange); background: #fff; font-size: 13px; line-height: 1.55; }
+    .result-box b { display: block; margin-bottom: 4px; }
+
+    .chains { margin-top: 28px; display: grid; gap: 15px; }
+    .chain { border: 1px solid var(--line); background: white; border-radius: 17px; padding: 15px; }
+    .chain-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .chain-title { font-size: 12px; font-weight: 760; }
+    .chain-badge { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; border-radius: 999px; padding: 4px 7px; }
+    .direct .chain-badge { color: var(--green); background: var(--green-soft); }
+    .translated .chain-badge { color: var(--orange); background: var(--orange-soft); }
+    .nodes { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .node { padding: 8px 9px; border: 1px solid #dedfd9; border-radius: 9px; font-size: 10px; font-weight: 680; background: #fbfbf8; opacity: 0; transform: translateX(-7px); }
+    .arrow { color: #8c948d; font-size: 12px; opacity: 0; }
+    .chain.play .node, .chain.play .arrow { animation: nodeIn .36s ease forwards; animation-delay: calc(var(--i) * 90ms); }
+    .translation-layer { border-color: rgba(216,95,56,.35); color: var(--orange); background: #fff8f5; }
+    .takeaway { margin-top: auto; padding-top: 28px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .reflection-trigger { width: 100%; margin-top: 18px; justify-content: center; display: none; }
+    .reflection-trigger.ready { display: flex; animation: fadeUp .4s ease; }
+
+    .toast { position: fixed; inset: 0; z-index: 10; display: none; place-items: center; background: rgba(20,29,22,.42); backdrop-filter: blur(7px); padding: 20px; }
+    .toast.show { display: grid; }
+    .modal { width: min(480px, 100%); background: var(--panel); border-radius: 24px; padding: 32px; box-shadow: var(--shadow); animation: pop .35s ease both; }
+    .modal-visual { height: 140px; border-radius: 18px; background: #e9e8e0; display: grid; place-items: center; position: relative; overflow: hidden; }
+    .pulse { width: 60px; height: 60px; border-radius: 18px; display: grid; place-items: center; background: white; box-shadow: 0 10px 25px rgba(23,32,25,.13); font-weight: 800; color: var(--green); animation: pulse 1.15s ease infinite; }
+    .modal h3 { margin: 25px 0 8px; font-size: 26px; }
+    .modal p { margin: 0; color: var(--muted); line-height: 1.6; }
+    .modal-status { margin-top: 18px; display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--green); font-weight: 700; }
+    .modal-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .modal-action { width: 100%; margin-top: 18px; border: 1px solid var(--ink); border-radius: 0; background: var(--ink); color: white; padding: 12px 14px; cursor: pointer; font-weight: 700; text-align: center; }
+    .modal-action:hover, .modal-action:focus-visible { background: var(--green); }
+
+    .reflection { display: none; min-height: 100svh; padding: 26px; }
+    .reflection.active { display: grid; place-items: center; animation: fadeUp .55s ease; }
+    .reflection-inner { width: min(1100px, 100%); }
+    .reflection h2 { max-width: 870px; font-size: clamp(42px, 7vw, 88px); }
+    .reflection h2 span { color: var(--orange); }
+    .reflection-grid { margin-top: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .reflection-card { padding: 26px; border-radius: 20px; border: 1px solid var(--line); background: rgba(255,255,255,.68); }
+    .reflection-card small { color: var(--muted); font-weight: 760; letter-spacing: .12em; text-transform: uppercase; }
+    .reflection-card p { font-size: 20px; line-height: 1.5; margin: 18px 0 0; }
+    .final-question { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 28px; display: flex; justify-content: space-between; align-items: end; gap: 30px; }
+    .final-question p { margin: 0; max-width: 700px; font-size: clamp(20px, 3vw, 31px); line-height: 1.42; letter-spacing: -.025em; }
+    .restart { border: 0; background: transparent; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; color: var(--muted); white-space: nowrap; }
+
+    /* HarmonyOS-inspired experiential desktop: a conceptual simulation, not a system replica. */
+    .desk { padding: 22px; background: #dfe9ef; }
+    .harmony-desktop {
+      min-height: 690px; height: 100%; border-radius: 26px; overflow: hidden; position: relative;
+      color: #132533; isolation: isolate; padding: 22px 28px 98px;
+      background:
+        radial-gradient(circle at 75% 16%, rgba(255,255,255,.96) 0 5%, rgba(255,255,255,.48) 5.2% 11%, transparent 11.2%),
+        radial-gradient(ellipse at 16% 86%, rgba(64,167,195,.65), transparent 34%),
+        radial-gradient(ellipse at 92% 72%, rgba(240,174,143,.58), transparent 31%),
+        linear-gradient(145deg, #cae9f0 0%, #eef4f3 44%, #eaded8 100%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.62);
+    }
+    .harmony-desktop::before {
+      content: ""; position: absolute; z-index: -1; width: 420px; height: 420px; border-radius: 45% 55% 65% 35%;
+      left: -120px; bottom: -180px; background: rgba(93,180,198,.28); filter: blur(2px); transform: rotate(18deg);
+    }
+    .system-status { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 650; text-shadow: 0 1px 10px rgba(255,255,255,.6); }
+    .system-status-right { display: flex; align-items: center; gap: 10px; }
+    .signal { display: inline-flex; align-items: end; gap: 2px; height: 11px; }
+    .signal i { display: block; width: 2px; border-radius: 2px; background: currentColor; }
+    .signal i:nth-child(1) { height: 4px; } .signal i:nth-child(2) { height: 7px; } .signal i:nth-child(3) { height: 10px; }
+    .battery { width: 18px; height: 9px; border: 1px solid currentColor; border-radius: 2px; position: relative; }
+    .battery::before { content: ""; position: absolute; inset: 2px; right: 4px; background: currentColor; border-radius: 1px; }
+    .battery::after { content: ""; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: currentColor; border-radius: 0 2px 2px 0; }
+    .system-greeting { margin: 38px 0 22px; display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+    .system-greeting h2 { font-size: clamp(30px, 3.5vw, 48px); font-weight: 570; }
+    .system-greeting p { margin: 7px 0 0; color: rgba(19,37,51,.62); font-size: 13px; }
+    .system-tag { border: 1px solid rgba(19,37,51,.13); background: rgba(255,255,255,.46); backdrop-filter: blur(12px); padding: 8px 12px; border-radius: 999px; font-size: 10px; }
+    .widget-row { display: grid; grid-template-columns: 1.25fr .75fr; gap: 13px; margin-bottom: 28px; }
+    .service-widget { min-height: 145px; border-radius: 24px; padding: 20px; background: rgba(255,255,255,.64); border: 1px solid rgba(255,255,255,.75); backdrop-filter: blur(22px); box-shadow: 0 16px 32px rgba(62,94,109,.1); }
+    .service-widget.project { background: linear-gradient(135deg, rgba(255,255,255,.84), rgba(237,247,248,.63)); }
+    .widget-top { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: rgba(19,37,51,.6); }
+    .widget-top b { color: #132533; font-size: 13px; }
+    .project-strip { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+    .project-image { width: 74px; height: 70px; border-radius: 17px; background: linear-gradient(155deg, #ffd19c, #df846c 48%, #7cb5c9 49%, #4a8ea7); position: relative; overflow: hidden; }
+    .project-image::after { content: ""; position: absolute; width: 70px; height: 36px; border-radius: 50%; left: 10px; bottom: -20px; background: #f6e5c4; transform: rotate(-10deg); }
+    .project-meta strong { display: block; font-size: 17px; } .project-meta span { font-size: 11px; color: rgba(19,37,51,.56); }
+    .weather-num { font-size: 45px; line-height: 1; margin-top: 18px; font-weight: 350; letter-spacing: -.05em; }
+    .weather-note { font-size: 11px; color: rgba(19,37,51,.57); margin-top: 8px; }
+    .desktop-label { margin: 0 0 14px; font-size: 11px; color: rgba(19,37,51,.55); font-weight: 650; }
+    .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .task-card { min-height: 112px; padding: 8px 4px; border: 0; border-radius: 18px; background: transparent; text-align: center; overflow: visible; display: flex; flex-direction: column; align-items: center; }
+    .task-card:hover { background: rgba(255,255,255,.3); box-shadow: none; transform: translateY(-4px); }
+    .task-card.active { border-color: transparent; box-shadow: none; background: rgba(255,255,255,.5); }
+    .task-card.visited::after { content: "✓"; right: calc(50% - 29px); top: 3px; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: #21a36c; color: white; font-size: 10px; box-shadow: 0 2px 5px rgba(0,0,0,.18); }
+    .task-card .app-icon { width: 58px; height: 58px; border-radius: 17px; margin: 0 0 9px; box-shadow: 0 8px 17px rgba(45,71,80,.16); }
+    .task-card h3 { font-size: 12px; font-weight: 560; text-shadow: 0 1px 8px rgba(255,255,255,.8); }
+    .task-card p { display: none; }
+    .file-icon { background: linear-gradient(145deg, #ff815e, #ffb37c); }
+    .file-icon::before { border-color: white; } .file-icon::after { background: white; box-shadow: 0 6px 0 white; }
+    .device-icon { background: linear-gradient(145deg, #457cee, #6db7fa); }
+    .device-icon::before { border-color: white; } .device-icon::after { background: white; }
+    .data-icon { background: linear-gradient(145deg, #8274e7, #bd91e9); }
+    .data-icon::before { border-color: white; box-shadow: 0 7px 0 -2px white, 0 14px 0 -2px white; }
+    .code-icon { background: linear-gradient(145deg, #16a371, #69cea8); }
+    .code-icon::before { color: white; }
+    .dock { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; gap: 13px; padding: 10px 14px; border: 1px solid rgba(255,255,255,.72); border-radius: 23px; background: rgba(255,255,255,.48); backdrop-filter: blur(24px); box-shadow: 0 15px 30px rgba(54,79,90,.16); }
+    .dock-icon { width: 38px; height: 38px; border-radius: 12px; background: white; display: grid; place-items: center; color: #3a6ab2; font-weight: 800; font-size: 15px; box-shadow: 0 5px 10px rgba(49,74,86,.12); }
+    .dock-icon:nth-child(2) { color: #25a06f; } .dock-icon:nth-child(3) { color: #d66a4b; } .dock-icon:nth-child(4) { color: #775cb5; }
+    .simulation-note { position: absolute; left: 28px; bottom: 32px; font-size: 9px; color: rgba(19,37,51,.48); }
+    .inspectable { cursor: help; transition: transform .2s, box-shadow .2s, background .2s; }
+    .inspectable:hover, .inspectable:focus-visible { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(45,74,87,.14); }
+    .floating-note {
+      position: absolute; z-index: 8; width: min(280px, calc(100% - 32px)); padding: 13px 14px;
+      border-radius: 13px; color: white; background: rgba(17,31,40,.92); backdrop-filter: blur(15px);
+      box-shadow: 0 13px 28px rgba(18,31,39,.2); pointer-events: none; opacity: 0; transform: translateY(7px) scale(.98);
+      transition: opacity .16s, transform .16s; font-size: 11px; line-height: 1.5;
+    }
+    .floating-note.show { opacity: 1; transform: none; }
+    .floating-note b { display: block; margin-bottom: 3px; color: #95e8c7; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+    .dock button { border: 0; font: inherit; cursor: help; }
+    .theory-index { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 18px; }
+    .theory-index > b { display: block; margin-bottom: 10px; color: var(--muted); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+    .theory-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+    .theory-pill { border: 1px solid var(--line); background: white; border-radius: 999px; padding: 7px 10px; color: #4f5a52; font-size: 10px; cursor: help; }
+    .theory-pill:hover, .theory-pill:focus-visible { border-color: var(--green); color: var(--green); }
+    .reflection-thesis { margin-top: 30px; max-width: 910px; padding: 24px 26px; border-left: 4px solid var(--orange); background: rgba(255,255,255,.62); font-size: clamp(19px, 2.4vw, 28px); line-height: 1.5; letter-spacing: -.02em; }
+    .reflection-thesis b { color: var(--orange); }
+    .question-list { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .question-item { padding: 20px; border: 1px solid var(--line); border-radius: 16px; color: #4f5951; line-height: 1.5; font-size: 13px; }
+    .question-item span { display: block; color: var(--orange); font-size: 10px; font-weight: 750; margin-bottom: 8px; letter-spacing: .1em; }
+    .verdict { margin-top: 28px; border-top: 2px solid var(--ink); padding-top: 20px; }
+    .verdict h3 { margin: 0 0 6px; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
+    .verdict > p { margin: 0; color: var(--muted); font-size: 13px; }
+    .verdict-options { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink); border: 1px solid var(--ink); }
+    .verdict-choice { border: 0; border-radius: 0; background: var(--panel); padding: 18px; text-align: left; cursor: pointer; color: var(--ink); }
+    .verdict-choice:hover, .verdict-choice:focus-visible { background: #e8ebe7; }
+    .verdict-choice b { display: block; margin-bottom: 4px; font-size: 14px; }
+    .verdict-choice span { color: var(--muted); font-size: 11px; }
+    .verdict-answer { display: none; margin-top: 1px; padding: 22px; background: var(--ink); color: #f3f1e9; line-height: 1.65; }
+    .verdict-answer.show { display: block; animation: fadeUp .3s ease; }
+    .verdict-answer strong { color: #b8d3c2; }
+
+    /* Paper mode: compact, flat, analytical. */
+    :root { --paper: #ecece7; --panel: #f7f7f2; --line: #bfc2bb; --radius: 0; --shadow: none; }
+    body { background: var(--paper); font-family: Arial, Helvetica, sans-serif; }
+    .intro { min-height: 100svh; padding: 32px; }
+    .intro::after { display: none; }
+    .intro-inner { width: min(1040px,100%); border-top: 7px solid var(--ink); padding-top: 24px; }
+    .eyebrow { color: var(--ink); font-family: ui-monospace, monospace; }
+    h1, h2, .annotation h3 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.035em; }
+    h1 { margin: 28px 0 20px; font-size: clamp(46px, 7vw, 90px); line-height: .98; }
+    h1 span, .reflection h2 span { color: var(--ink); font-style: italic; }
+    .intro-copy { max-width: 760px; color: #3f443f; font-family: Georgia, serif; }
+    .primary { border-radius: 0; background: var(--ink); padding: 12px 16px; }
+    .app { padding: 0; }
+    .shell { min-height: 100svh; border: 0; border-radius: 0; background: var(--panel); }
+    .topbar { height: 50px; padding: 0 18px; background: var(--ink); color: white; border: 0; }
+    .brand-mark { border-radius: 0; box-shadow: 13px 0 0 #aeb9af; background: white; }
+    .workspace { min-height: calc(100svh - 50px); grid-template-columns: minmax(0,1.25fr) minmax(380px,.75fr); }
+    .desk { padding: 18px; background: #e4e6e1; }
+    .harmony-desktop { min-height: 640px; border-radius: 0; padding: 16px 20px 76px; background: #dfe3e0; box-shadow: inset 0 0 0 1px #aeb4ae; }
+    .harmony-desktop::before { display: none; }
+    .system-tag, .service-widget, .dock, .task-card, .task-card .app-icon, .floating-note { border-radius: 0; backdrop-filter: none; box-shadow: none; }
+    .service-widget { min-height: 118px; padding: 14px; background: #f3f3ee; border: 1px solid #aeb4ae; }
+    .service-widget.project { background: #f3f3ee; }
+    .system-greeting { margin: 24px 0 15px; }
+    .widget-row { margin-bottom: 18px; gap: 8px; }
+    .project-image { border-radius: 0; filter: grayscale(1); height: 52px; width: 62px; }
+    .project-strip { margin-top: 12px; }
+    .weather-num { font-family: Georgia,serif; font-size: 36px; margin-top: 12px; }
+    .cards { gap: 5px; }
+    .task-card { min-height: 94px; border: 1px solid transparent; border-radius: 0; padding: 7px; }
+    .task-card:hover, .task-card.active { background: #f4f4ef; border-color: #89918a; box-shadow: none; }
+    .task-card .app-icon { width: 45px; height: 45px; background: #2d3a32; }
+    .task-card h3 { font-family: ui-monospace,monospace; font-size: 10px; text-shadow: none; }
+    .task-card.visited::after { border-radius: 0; background: var(--ink); }
+    .dock { bottom: 14px; border: 1px solid #969e97; background: #f3f3ee; padding: 6px; gap: 1px; }
+    .dock-icon { border-radius: 0; background: transparent; box-shadow: none; border-right: 1px solid #c7cbc5 !important; }
+    .dock-icon:last-child { border-right: 0 !important; }
+    .annotation { padding: 24px; background: #f7f7f2; }
+    .result-box, .chain, .node, .chain-badge, .theory-pill, .reflection-card, .question-item, .modal, .modal-visual { border-radius: 0; box-shadow: none; }
+    .chain { padding: 12px; }
+    .reflection { padding: 32px; }
+    .reflection-grid { gap: 1px; background: var(--ink); border: 1px solid var(--ink); }
+    .reflection-card { border: 0; background: var(--panel); }
+    .reflection-thesis { background: transparent; border-left: 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 18px 0; }
+    .reflection-thesis b { color: var(--ink); }
+    .question-list { gap: 1px; background: var(--line); }
+    .question-item { border: 0; background: var(--panel); }
+    .question-item span { color: var(--ink); }
+    .app.active, .reflection.active, .reflection-trigger.ready, .modal, .verdict-answer.show { animation: none; }
+    .pulse { animation: none; border-radius: 0; box-shadow: none; }
+    .chain.play .node, .chain.play .arrow { animation: none; opacity: 1; transform: none; }
+    .floating-note, .task-card, .inspectable, .primary { transition-duration: .08s; }
+    /* Continuous single-page paper */
+    .intro { min-height: 0; display: block; padding: 26px 32px 30px; border-bottom: 1px solid var(--ink); }
+    .intro-inner { width: min(1180px,100%); margin: 0 auto; display: grid; grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr); column-gap: 42px; align-items: end; padding-top: 16px; }
+    .intro .eyebrow { grid-column: 1 / -1; }
+    .intro h1 { margin: 18px 0 0; font-size: clamp(42px, 6vw, 78px); }
+    .intro-copy { font-size: clamp(16px,1.5vw,20px); line-height: 1.5; margin: 0; }
+    .start-row { grid-column: 2; margin-top: 18px; gap: 12px; }
+    .app { display: block; min-height: 0; }
+    .app.active { display: block; }
+    .shell { min-height: 0; }
+    .topbar { position: sticky; top: 0; z-index: 9; }
+    .workspace { min-height: 0; }
+    .harmony-desktop { min-height: 590px; }
+    .annotation { min-height: 590px; }
+    .reflection { display: grid; min-height: 0; place-items: center; padding: 34px 32px 42px; border-top: 6px solid var(--ink); }
+    .reflection.active { display: grid; }
+    .reflection h2 { font-size: clamp(38px,5.5vw,68px); margin-top: 14px; }
+    .reflection-grid { margin-top: 24px; }
+    .reflection-thesis { margin-top: 18px; }
+    .question-list, .verdict, .final-question { margin-top: 18px; }
+    .reflection-card, .question-item { padding: 17px; }
+    .final-question { padding-top: 18px; }
+    @media (max-width: 760px) {
+      .intro-inner { display: block; }
+      .intro-copy { margin-top: 18px; }
+      .start-row { margin-top: 18px; }
+    }
+    .paper-article { width: min(1180px, calc(100% - 48px)); margin: 0 auto; display: grid; grid-template-columns: 190px minmax(0,720px) minmax(170px,1fr); gap: 32px; padding: 38px 0; }
+    .paper-toc { align-self: start; position: sticky; top: 72px; border-top: 2px solid var(--ink); padding-top: 12px; font: 10px/1.5 ui-monospace,monospace; }
+    .paper-toc b { display: block; margin-bottom: 10px; letter-spacing: .12em; }
+    .paper-toc a { display: block; color: var(--muted); text-decoration: none; padding: 5px 0; border-bottom: 1px solid #d2d4ce; }
+    .paper-toc a:hover { color: var(--ink); }
+    .paper-main { min-width: 0; }
+    .paper-meta { display: flex; gap: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); font: 10px ui-monospace,monospace; color: var(--muted); }
+    .paper-main h2 { margin: 28px 0 12px; font-size: clamp(31px,4vw,48px); line-height: 1.08; }
+    .paper-main h3 { margin: 30px 0 9px; font: 600 19px Georgia,serif; }
+    .paper-main p { margin: 0 0 15px; font: 17px/1.7 Georgia,"Times New Roman",serif; color: #303630; }
+    .paper-main .lead::first-letter { float: left; font: 64px/.76 Georgia,serif; padding: 8px 8px 0 0; }
+    .abstract { margin: 22px 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .abstract b { display: block; margin-bottom: 7px; font: 10px ui-monospace,monospace; letter-spacing: .12em; }
+    .abstract p { margin: 0; font-size: 15px; }
+    .paper-quote { margin: 24px 0; padding: 15px 20px; border-left: 3px solid var(--ink); font: italic 23px/1.45 Georgia,serif; }
+    .paper-aside { align-self: start; margin-top: 70px; font: 11px/1.55 Arial,sans-serif; color: var(--muted); }
+    .paper-aside article { border-top: 1px solid var(--ink); padding-top: 8px; margin-bottom: 28px; }
+    .paper-aside b { display: block; margin-bottom: 5px; color: var(--ink); font: 10px ui-monospace,monospace; letter-spacing: .1em; }
+    .definition-table { margin: 22px 0; border-top: 2px solid var(--ink); }
+    .definition-row { display: grid; grid-template-columns: 145px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .definition-row b { font: 11px ui-monospace,monospace; }
+    .definition-row span { font: 14px/1.5 Arial,sans-serif; color: #454b45; }
+    .interactive-figure { margin: 28px 0; border: 1px solid var(--ink); padding: 16px; background: #f1f1ec; }
+    .figure-label { display: flex; justify-content: space-between; font: 9px ui-monospace,monospace; letter-spacing: .1em; margin-bottom: 16px; }
+    .spectrum-labels { display: flex; justify-content: space-between; gap: 20px; font: 11px ui-monospace,monospace; }
+    .system-range { width: 100%; margin: 18px 0; accent-color: var(--ink); }
+    .spectrum-output { min-height: 76px; padding-top: 12px; border-top: 1px solid var(--line); font: 14px/1.55 Arial,sans-serif; }
+    .spectrum-output b { display: block; margin-bottom: 4px; }
+    .claim-box { margin: 25px 0; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--ink); }
+    .claim-box button { border: 0; border-radius: 0; background: transparent; padding: 13px; cursor: pointer; font: 11px ui-monospace,monospace; }
+    .claim-box button + button { border-left: 1px solid var(--ink); }
+    .claim-box button.active { background: var(--ink); color: white; }
+    .claim-response { grid-column: 1/-1; border-top: 1px solid var(--ink); padding: 15px; font: 14px/1.55 Arial,sans-serif; }
+    .interlude { width: min(1180px,calc(100% - 48px)); margin: 0 auto; padding: 34px 220px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+    .interlude h2 { margin: 0 0 14px; font-size: 38px; }
+    .interlude p { font: 17px/1.7 Georgia,serif; }
+    .interlude ol { padding-left: 22px; font: 15px/1.65 Arial,sans-serif; }
+    .notes { margin-top: 34px; padding-top: 15px; border-top: 2px solid var(--ink); }
+    .notes h3 { margin-top: 0; }
+    .notes p { font-size: 13px; font-family: Arial,sans-serif; line-height: 1.55; }
+    @media (max-width: 950px) {
+      .paper-article { grid-template-columns: minmax(0,1fr); max-width: 760px; }
+      .paper-toc { position: static; display: grid; grid-template-columns: repeat(3,1fr); gap: 0 12px; }
+      .paper-toc b { grid-column: 1/-1; }
+      .paper-aside { margin-top: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .interlude { padding: 30px 24px; }
+    }
+    @media (max-width: 590px) {
+      .paper-article { width: calc(100% - 32px); padding: 26px 0; gap: 22px; }
+      .paper-toc { grid-template-columns: 1fr 1fr; }
+      .paper-aside { grid-template-columns: 1fr; }
+      .definition-row { grid-template-columns: 1fr; gap: 5px; }
+      .claim-box { grid-template-columns: 1fr; }
+      .claim-box button + button { border-left: 0; border-top: 1px solid var(--ink); }
+      .interlude { width: calc(100% - 32px); padding: 24px 0; border: 0; }
+    }
+    /* Unified reading widths and vertical experiment flow */
+    .paper-article { width: min(900px,calc(100% - 48px)); display: grid; grid-template-columns: minmax(0,1fr); gap: 24px; }
+    .paper-toc { position: static; display: grid; grid-template-columns: repeat(4,1fr); gap: 0 14px; width: 100%; }
+    .paper-toc b { grid-column: 1/-1; }
+    .paper-main { width: 100%; }
+    .paper-main p, .abstract p { font-size: 17px; line-height: 1.68; }
+    .paper-aside { width: 100%; margin-top: 0; display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; font-size: 14px; line-height: 1.6; color: #414741; }
+    .paper-aside article { margin: 0; }
+    .definition-row span, .spectrum-output, .claim-response { font-size: 15px; }
+    .workspace { display: block; }
+    .desk { width: 100%; border-right: 0; border-bottom: 1px solid var(--ink); padding: 22px; }
+    .harmony-desktop { width: min(1040px,100%); min-height: 540px; margin: 0 auto; }
+    .annotation { width: min(1040px,100%); min-height: 0; margin: 0 auto; padding: 30px 24px 34px; display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr); gap: 0 36px; background: var(--panel); }
+    .annotation-label { grid-column: 1/-1; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
+    .annotation h3 { grid-column: 1; margin: 22px 0 10px; }
+    .annotation-copy { grid-column: 1; min-height: 0; }
+    .result-box { grid-column: 1; margin-top: 14px; }
+    .chains { grid-column: 2; grid-row: 2 / span 4; margin-top: 22px; align-self: start; }
+    .takeaway { grid-column: 1; margin: 0; padding-top: 18px; }
+    .theory-index { grid-column: 1; }
+    .reflection-trigger { grid-column: 1/-1; }
+    @media (max-width: 760px) {
+      .paper-toc { grid-template-columns: 1fr 1fr; }
+      .paper-aside { grid-template-columns: 1fr; }
+      .annotation { display: block; padding: 24px 18px 30px; }
+      .chains { margin-top: 22px; }
+      .harmony-desktop { min-height: 620px; }
+    }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } }
+    @media (max-width: 590px) { .verdict-options { grid-template-columns: 1fr; } }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes nodeIn { to { opacity: 1; transform: none; } }
+    @keyframes pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pulse { 50% { transform: scale(.94); box-shadow: 0 4px 12px rgba(23,32,25,.08); } }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+      .desk { border-right: 0; border-bottom: 1px solid var(--line); }
+      .annotation { min-height: 0; }
+      .harmony-desktop { min-height: 560px; }
+    }
+    @media (max-width: 590px) {
+      .app { padding: 0; }
+      .shell { border: 0; border-radius: 0; }
+      .topbar { padding: 0 17px; }
+      .brand { font-size: 13px; }
+      .counter { display: none; }
+      .desk { padding: 28px 17px 34px; }
+      .desk { padding: 0; }
+      .harmony-desktop { border-radius: 0; padding: 18px 16px 90px; min-height: 690px; }
+      .widget-row { grid-template-columns: 1fr; }
+      .service-widget.weather { display: none; }
+      .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+      .task-card { min-height: 106px; }
+      .task-card h3 { font-size: 10px; }
+      .simulation-note { display: none; }
+      .floating-note { position: fixed; left: 16px !important; right: 16px; bottom: 16px; top: auto !important; width: auto; }
+      .annotation { padding: 28px 17px; }
+      .reflection { padding: 54px 20px; }
+      .intro { padding: 22px 20px 26px; }
+      .reflection { padding: 28px 20px 34px; }
+      .reflection-grid { grid-template-columns: 1fr; }
+      .question-list { grid-template-columns: 1fr; }
+      .final-question { align-items: start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+    /* Article-first composition: floating reading aids, one integrated experiment figure. */
+    .intro { border-bottom: 0; padding-bottom: 20px; }
+    .paper-article { width: min(1120px,calc(100% - 48px)); grid-template-columns: 180px minmax(0,720px) 180px; gap: 20px; align-items: start; }
+    .paper-toc { position: sticky; top: 24px; display: block; border-top: 1px solid #9da19b; padding-top: 10px; font-size: 11px; }
+    .paper-toc b { display: block; }
+    .paper-toc a { border: 0; padding: 4px 0; }
+    .paper-aside { position: sticky; top: 24px; display: block; width: 100%; font-size: 13px; line-height: 1.58; }
+    .paper-aside article { padding-top: 7px; margin-bottom: 22px; border-top: 1px solid #adb1aa; }
+    .paper-main { grid-column: 2; }
+    .abstract { border-color: #c9cbc5; }
+    .definition-table { border-top-width: 1px; }
+    .app { width: min(900px,calc(100% - 48px)); margin: 30px auto 18px; }
+    .shell { overflow: visible; background: transparent; }
+    .topbar { position: static; height: auto; min-height: 42px; padding: 0 0 10px; color: var(--ink); background: transparent; border: 0; align-items: end; }
+    .brand { font: 11px ui-monospace,monospace; letter-spacing: .08em; }
+    .brand-mark { display: none; }
+    .progress-dot { height: 3px; border-radius: 0; background: #c7c9c3; }
+    .progress-dot.done, .progress-dot.current { background: var(--ink); }
+    .desk { padding: 0; background: transparent; border: 0; }
+    .harmony-desktop { width: 100%; min-height: 520px; border: 1px solid #aeb2ab; border-bottom: 0; }
+    .annotation { width: 100%; margin-top: 0; border: 1px solid #aeb2ab; padding: 24px 22px 28px; background: #f3f3ee; }
+    .annotation-label { border: 0; padding: 0 0 4px; }
+    .annotation h3 { margin-top: 14px; }
+    .reflection { border-top: 0; padding-top: 30px; }
+    .reflection-grid { background: transparent; border: 0; gap: 20px; }
+    .reflection-card { border-top: 1px solid #aeb2ab; padding-left: 0; padding-right: 0; }
+    .reflection-thesis { border-color: #b9bcb6; }
+    .question-list { background: transparent; gap: 18px; }
+    .question-item { border-top: 1px solid #c0c3bd; padding-left: 0; padding-right: 0; }
+    .interlude { width: min(720px,calc(100% - 48px)); padding: 26px 0; border: 0; }
+    .notes { border-top: 1px solid #b8bbb5; }
+    @media (max-width: 1050px) {
+      .paper-article { width: min(760px,calc(100% - 48px)); grid-template-columns: 1fr; }
+      .paper-main { grid-column: 1; grid-row: 2; }
+      .paper-toc { position: static; grid-row: 1; display: grid; grid-template-columns: repeat(4,1fr); gap: 0 12px; }
+      .paper-toc b { grid-column: 1/-1; }
+      .paper-aside { position: static; grid-row: 3; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    }
+    @media (max-width: 760px) {
+      .app { width: 100%; margin-top: 24px; }
+      .topbar { padding: 0 18px 10px; }
+      .harmony-desktop { border-left: 0; border-right: 0; }
+      .annotation { border-left: 0; border-right: 0; }
+      .paper-toc { grid-template-columns: 1fr 1fr; }
+      .paper-aside { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <section class="intro" id="intro">
+    <div class="intro-inner">
+      <div class="eyebrow">Interactive paper · System study 01</div>
+      <h1>What makes a system<br><span>a system?</span></h1>
+      <p class="intro-copy">A conventional computer asks users to work through concepts that resemble its operating structure: files, programs, processes, and devices. An experience-first system translates those structures into tasks, apps, and services. <strong>If machine logic is no longer the user's primary logic, can the environment still be called—and used as—a system?</strong></p>
+    </div>
+  </section>
+
+  <article class="paper-article" aria-label="Essay introduction and argument">
+    <nav class="paper-toc" aria-label="Contents">
+      <b>CONTENTS</b>
+      <a href="#abstract">00 — Abstract</a>
+      <a href="#definition">01 — A definition</a>
+      <a href="#two-logics">02 — Two logics</a>
+      <a href="#spectrum">03 — A spectrum</a>
+      <a href="#experiment">04 — Exhibits</a>
+      <a href="#counterargument">05 — Objection</a>
+      <a href="#reflection">06 — Conclusion</a>
+    </nav>
+
+    <div class="paper-main">
+      <div class="paper-meta"><span>INTERACTIVE ESSAY 01</span><span>SYSTEM STUDIES</span><span>2026</span></div>
+      <section id="abstract" class="abstract">
+        <b>ABSTRACT</b>
+        <p>This paper asks whether a computer system remains a system when its primary user logic no longer resembles the logic of files, processes, runtimes, and devices. It argues that experience-oriented environments remain systems, but relocate legibility and agency from the user-facing operating model into the services that interpret user intent.</p>
+      </section>
+
+      <section id="definition">
+        <h2>01. A system is a set of permitted relations</h2>
+        <p class="lead">A computer system is often described as a collection of hardware and software. That definition is accurate but incomplete for the user. A system is also an environment of relations: it determines what can be named, inspected, combined, executed, protected, and changed.</p>
+        <p>A folder, a process, and a connected camera are not raw pieces of machinery. They are already abstractions. Yet they preserve a relatively stable correspondence with the operating system's own organisation. Moving a file changes a file-system relation. Running a program creates a process. Selecting a device directs a program toward an interface.</p>
+        <div class="paper-quote">The question is not whether a system mediates. Every operating system mediates. The question is where mediation ends—and which layer the user is allowed to inhabit.</div>
+        <div class="definition-table" aria-label="Working definitions">
+          <div class="definition-row"><b>SYSTEM</b><span>An organised computational environment that governs relations among users, software, data, and machines.</span></div>
+          <div class="definition-row"><b>DIRECTNESS</b><span>Not unmediated hardware control, but a traceable correspondence between user actions and operative system objects.</span></div>
+          <div class="definition-row"><b>TRANSLATION</b><span>The reorganisation of system objects into applications, tasks, services, permissions, and outcomes.</span></div>
+          <div class="definition-row"><b>AGENCY</b><span>The capacity to inspect, choose, combine, and alter the relations through which computation occurs.</span></div>
+        </div>
+      </section>
+
+      <section id="two-logics">
+        <h2>02. Two philosophies of use</h2>
+        <h3>The machine as an operable environment</h3>
+        <p>In a logic-aligned system, the user is invited to think in system objects. Files exist independently of the applications that open them. Programs can be selected, replaced, scripted, and combined. Devices become resources for multiple processes. Power appears as generality: the environment supports behaviours that its designers did not specify in advance.</p>
+        <h3>The machine as a coordinated experience</h3>
+        <p>In an experience-translated system, the user's intention becomes the organising unit. A photograph is “added to a project”; a nearby camera “continues the current task”; records appear as a card. The framework decides whether the underlying action involves copying, referencing, synchronising, granting permission, or calling a service.</p>
+        <p>This second model does not remove computation. It changes its public grammar. The system remains active—perhaps more active than before—but the user encounters the system through the meanings designed by applications and services.</p>
+      </section>
+
+      <section id="spectrum">
+        <h2>03. Not a binary, but a spectrum</h2>
+        <p>Real operating systems mix both philosophies. A desktop computer may hide device negotiation behind a friendly panel; an experience-first system may still expose files or developer tools. Use the figure below to examine what changes as translation increases.</p>
+        <figure class="interactive-figure">
+          <figcaption class="figure-label"><span>FIG. 02</span><span>MOVE THE CONTROL</span></figcaption>
+          <div class="spectrum-labels"><span>SYSTEM OBJECTS</span><span>EXPERIENCE INTENT</span></div>
+          <input class="system-range" id="systemRange" type="range" min="0" max="100" value="50" aria-label="Balance between system-object and experience-intent logic">
+          <div class="spectrum-output" id="spectrumOutput"><b>HYBRID POSITION</b>The user sees some operative objects, while services translate other actions into managed outcomes.</div>
+        </figure>
+        <div class="claim-box" aria-label="Test the central claim">
+          <button class="claim-toggle active" data-claim="function">A system is what it can do</button>
+          <button class="claim-toggle" data-claim="relation">A system is how it lets us do it</button>
+          <div class="claim-response" id="claimResponse">Function is necessary evidence: if an environment can store, compute, communicate, and coordinate devices, it acts as a system. But functional equivalence alone does not reveal the authority, visibility, or composability available to its user.</div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="paper-aside">
+      <article><b>MARGIN NOTE 01</b>“Closer to machine logic” is a relational claim, not a claim of absolute hardware control.</article>
+      <article><b>MARGIN NOTE 02</b>Open source and user operability are different properties. A closed system may expose powerful objects; an open codebase may ship a tightly managed product.</article>
+      <article><b>READING METHOD</b>Do not judge either interface by visual familiarity. Follow the causal path produced by the same action.</article>
+    </aside>
+  </article>
+
+  <main class="app" id="experiment" aria-live="polite">
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark"></span>HOW DOES A SYSTEM REACH THE MACHINE?</div>
+        <div class="progress" aria-label="Reading progress">
+          <span class="progress-dot current"></span><span class="progress-dot"></span><span class="progress-dot"></span><span class="progress-dot"></span>
+          <span class="counter"><b id="visitedCount">0</b> / 4 OBSERVED</span>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <section class="desk" aria-labelledby="deskTitle">
+          <div class="harmony-desktop">
+            <div class="system-status inspectable" tabindex="0" data-inspect="The status line compresses connection, power, and time into persistent system results while hiding the services and device interfaces that produce them.">
+              <span id="dateText">22 July</span>
+              <span class="system-status-right"><span id="clock">09:41</span><span class="signal" aria-hidden="true"><i></i><i></i><i></i></span><span>▴</span><span class="battery" aria-hidden="true"></span></span>
+            </div>
+
+            <div class="system-greeting">
+              <div><h2 id="deskTitle">System specimen</h2><p>Select an element. Observe the result, then inspect its path.</p></div>
+              <span class="system-tag">FIG. 01 / SIMULATION</span>
+            </div>
+
+            <div class="widget-row">
+              <article class="service-widget project inspectable" tabindex="0" data-inspect="A service card is not a folder. It reorganizes photos, notes, and device records around the task concept of a project; its underlying objects may remain distributed.">
+                <div class="widget-top"><b>FIELD STUDY</b><span>Project card · 8 items</span></div>
+                <div class="project-strip"><span class="project-image" aria-hidden="true"></span><span class="project-meta"><strong>Coastal observation</strong><span>Photos, notes, and device records</span></span></div>
+              </article>
+              <article class="service-widget weather inspectable" tabindex="0" data-inspect="The card provides actionable information directly. The user reaches a service result rather than its source, cache, or request process.">
+                <div class="widget-top"><b>SHANGHAI</b><span>Clear</span></div><div class="weather-num">29°</div><div class="weather-note">Good air · suitable for field work</div>
+              </article>
+            </div>
+
+            <p class="desktop-label">EXHIBITS — SELECT ONE TO REVEAL ITS LOGIC</p>
+            <div class="cards">
+              <button class="task-card" data-task="photo" aria-label="Add a photograph to the project">
+                <span class="app-icon file-icon" aria-hidden="true"></span><h3>IMAGE</h3><p>Add a photograph</p>
+              </button>
+              <button class="task-card" data-task="device" aria-label="Connect a nearby camera">
+                <span class="app-icon device-icon" aria-hidden="true"></span><h3>DEVICE</h3><p>Connect a camera</p>
+              </button>
+              <button class="task-card" data-task="data" aria-label="Read this month's data">
+                <span class="app-icon data-icon" aria-hidden="true"></span><h3>DATA</h3><p>Read records</p>
+              </button>
+              <button class="task-card" data-task="program" aria-label="Run an organising rule">
+                <span class="app-icon code-icon" aria-hidden="true"></span><h3>RULE</h3><p>Organise material</p>
+              </button>
+            </div>
+
+            <span class="simulation-note">A conceptual model of experience-oriented system logic · not a functional OS</span>
+            <nav class="dock" aria-label="Conceptual system controls">
+              <button class="dock-icon inspectable" data-inspect="Home is not a storage location. It is an experience space arranged by the system around task entry points.">⌂</button>
+              <button class="dock-icon inspectable" data-inspect="Messages unify different communication sources into one experience stream while protocols and storage structures recede.">✉</button>
+              <button class="dock-icon inspectable" data-inspect="Coordination translates nearby devices into usable capabilities rather than asking the user to manage each device object first.">◎</button>
+              <button class="dock-icon inspectable" data-inspect="Settings expose what the system permits the user to change. They are also an index of the system's boundaries.">⚙</button>
+            </nav>
+            <div class="floating-note" id="floatingNote"><b>Margin note</b><span></span></div>
+          </div>
+        </section>
+
+        <aside class="annotation" aria-labelledby="annotationTitle">
+          <div class="annotation-label"><span>What happened underneath</span><span>LIVE ANNOTATION</span></div>
+          <h3 id="annotationTitle">Select an exhibit</h3>
+          <p class="annotation-copy" id="annotationCopy">Both system types can complete the same task. This is not a comparison of appearance, authenticity, or whether either one is a system. It examines the relationship between a user's action and the system's actual operation.</p>
+          <div class="result-box" id="resultBox"><b>Shared result</b>No exhibit selected. Choose one from the paper specimen.</div>
+
+          <div class="chains" id="chains">
+            <div class="chain direct">
+              <div class="chain-head"><span class="chain-title">LOGIC-ALIGNED SYSTEM</span><span class="chain-badge">through system objects</span></div>
+              <div class="nodes" id="directNodes"></div>
+            </div>
+            <div class="chain translated">
+              <div class="chain-head"><span class="chain-title">EXPERIENCE-TRANSLATED SYSTEM</span><span class="chain-badge">through apps / services</span></div>
+              <div class="nodes" id="translatedNodes"></div>
+            </div>
+          </div>
+
+          <p class="takeaway" id="takeaway">Directness does not mean bypassing the operating system. It means the concepts, objects, and causal relations used by the user remain closer to those by which the system organises its own operations.</p>
+          <div class="theory-index">
+            <b>THEORETICAL INDEX · HOVER TO READ</b>
+            <div class="theory-pills">
+              <button class="theory-pill" data-theory="Alignment is not the absence of mediation. It is a shorter, traceable correspondence between the concepts a user handles and the objects a system actually processes.">LOGIC ALIGNMENT</button>
+              <button class="theory-pill" data-theory="A translation layer reinterprets files, processes, and devices as app functions and task experiences. It creates continuity while changing which causal relations remain visible.">EXPERIENCE TRANSLATION</button>
+              <button class="theory-pill" data-theory="The same abstraction can provide convenience, safety, and constraint. The question is not whether abstraction exists, but whether the user can enter the layers behind it.">ABSTRACTION BOUNDARY</button>
+            </div>
+          </div>
+          <button class="primary reflection-trigger" id="reflectionBtn">Read the conclusion <i>→</i></button>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <section class="interlude" id="counterargument">
+    <div class="eyebrow">05 · Objection and qualification</div>
+    <h2>Does translation make a system less real?</h2>
+    <p>No. An experience-first environment still schedules work, stores data, coordinates devices, enforces permissions, and supplies execution frameworks. It is unambiguously a system. The stronger criticism is different: when the framework becomes the principal interpreter of user intent, the environment may become less available as a general-purpose system <em>to that user</em>.</p>
+    <p>This distinction prevents two errors. It avoids treating complexity as a virtue by itself, and it avoids treating convenience as proof that two systems establish the same form of control.</p>
+    <ol>
+      <li><strong>Logic alignment</strong> benefits inspection, repair, automation, education, and unanticipated composition.</li>
+      <li><strong>Experience translation</strong> benefits safety, consistency, accessibility, managed permission, and cross-device continuity.</li>
+      <li>The relevant question is therefore not “Which one is a system?” but “Which system relations does this task require?”</li>
+    </ol>
+  </section>
+
+  <div class="toast" id="toast" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal-visual"><div class="pulse" id="modalSymbol">✓</div></div>
+      <h3 id="modalTitle">Action represented</h3>
+      <p id="modalCopy"></p>
+      <div class="modal-status" id="modalStatus">Result represented. Continue when ready.</div>
+      <button class="modal-action" id="modalContinue">Close and reveal both system paths</button>
+    </div>
+  </div>
+
+  <section class="reflection" id="reflection">
+    <div class="reflection-inner">
+      <div class="eyebrow">Reflection · Not a verdict</div>
+      <h2>Can both still be<br><span>called systems?</span></h2>
+      <div class="reflection-thesis"><b>Yes—but they enact different philosophies of use.</b> One system is an environment whose operative objects remain available for users to inspect and combine. The other is an organising intelligence that turns those objects into coherent experiences. It does not cease to be a system when it abandons machine-like interaction; it changes what the system is for, and where system agency resides.</div>
+      <div class="reflection-grid">
+        <article class="reflection-card"><small>LOGIC-ALIGNED SYSTEM</small><p>Exposes files, programs, processes, and devices as inspectable, composable objects. Its benefit is legibility, extensibility, and user-defined combinations; its cost is complexity and responsibility.</p></article>
+        <article class="reflection-card"><small>EXPERIENCE-TRANSLATED SYSTEM</small><p>Organises underlying objects into apps, tasks, permissions, and continuous services. Its benefit is coherence, safety, and cross-device continuity; its cost is reduced visibility and fewer unanticipated combinations.</p></article>
+      </div>
+      <div class="question-list">
+        <div class="question-item"><span>01 · VISIBILITY</span>When a result is good enough, do we still need to know which system objects produced it?</div>
+        <div class="question-item"><span>02 · COMPOSABILITY</span>Is using a function the same form of control as inspecting, recombining, and creating it?</div>
+        <div class="question-item"><span>03 · BOUNDARY</span>When a system hides complexity for us, does it also decide which actions are available to us?</div>
+      </div>
+      <div class="verdict">
+        <h3>Which system is better?</h3>
+        <p>Choose the statement that feels closer to your conclusion.</p>
+        <div class="verdict-options">
+          <button class="verdict-choice" data-choice="aligned"><b>The logic-aligned system</b><span>I value inspection, composition, and authority.</span></button>
+          <button class="verdict-choice" data-choice="translated"><b>The experience-translated system</b><span>I value coherence, protection, and continuity.</span></button>
+        </div>
+        <div class="verdict-answer" id="verdictAnswer"></div>
+      </div>
+      <div class="final-question">
+        <p>A system is not defined only by the functions it delivers. It also defines the relations permitted among <strong>users, data, software, and machines</strong>. The better system depends on which relations a situation needs.</p>
+        <button class="restart" id="restartBtn">Read again ↺</button>
+      </div>
+      <section class="notes">
+        <h3>Notes on scope</h3>
+        <p>This is a conceptual comparison, not a technical audit of one commercial operating system. “HarmonyOS-inspired” refers here to an experience-oriented design tendency: atomic services, task continuity, permission mediation, and cross-device coordination. Individual products can expose different degrees of file access, development tooling, and system control.</p>
+        <p>The categories are analytical models rather than mutually exclusive product labels. Their purpose is to make the relationship between interface, computation, and user agency discussable.</p>
+      </section>
+    </div>
+  </section>
+
+  <script>
+    const tasks = {
+      photo: {
+        title: 'Photograph added to project', symbol: '▧',
+        modal: 'The familiar result appears: the photograph is now in the project. The interface does not ask whether it was moved, copied, referenced, or synchronised.',
+        copy: 'In a logic-aligned system, “add to project” maps to a defined file operation. In an experience-translated system, it begins as a task intention; apps and services determine the underlying change.',
+        result: 'Both systems place the photograph in Field Study.',
+        direct: ['User', 'Image file', 'Move / copy', 'Project directory'],
+        translated: ['User', 'Project task', 'App translation', 'Content service', 'Stored object'],
+        takeaway: 'One system exposes an object and its change; the other first exposes what the user intends to accomplish. The outcome is identical, but “add” no longer names one definite system action.'
+      },
+      device: {
+        title: 'Camera feed connected', symbol: '●',
+        modal: 'The camera appears inside the current record. No driver or input device must be located; the system translates a nearby device into a capability for the present task.',
+        copy: 'Both systems can use the camera. The distinction is whether a user selects a system device for a program or requests a system-coordinated capability inside the current app.',
+        result: 'Both systems display the same camera feed.',
+        direct: ['User', 'Device interface', 'Driver', 'Program input'],
+        translated: ['User', 'Current task', 'Device service', 'Permission', 'Nearby camera'],
+        takeaway: 'Translation can reduce configuration and unify permissions, while also deciding how a device may appear. Mediation is simultaneously convenience, protection, and prior definition.'
+      },
+      data: {
+        title: '24 records found', symbol: '24',
+        modal: 'The filtered result appears as legible cards. The interface does not require contact with tables, fields, or the query process.',
+        copy: 'A logic-aligned system lets a user choose a tool and query a data structure. An experience-translated system wraps that query as an app filter and retrieves the answer through a data service.',
+        result: 'Both systems show the same 24 records.',
+        direct: ['User', 'Data file', 'Query tool', 'Result'],
+        translated: ['User', 'Filter action', 'App translation', 'Data service', 'Result cards'],
+        takeaway: 'Seeing data is not identical to inspecting and recombining its structure. A system may expose the result alone, or also expose the objects that produced it.'
+      },
+      program: {
+        title: 'Material automatically organised', symbol: '{ }',
+        modal: 'The material is sorted by date and type. The same result can come from running a rule directly or from an app translating that rule into permitted system operations.',
+        copy: 'The issue is not whether programming is possible, but how a user’s rule reaches the machine: as an executable object entering a runtime, or as an intention interpreted by an approved tool and interface.',
+        result: 'Both systems sort 36 items into four groups.',
+        direct: ['User rule', 'Code file', 'Runtime', 'Process', 'File system'],
+        translated: ['User rule', 'Automation app', 'Capability interface', 'System service', 'Stored object'],
+        takeaway: 'One system lets new functions emerge from composable structures; the other admits them through supplied capabilities. Both support creation, but their paths and boundaries differ.'
+      }
+    };
+
+    const intro = document.querySelector('#intro');
+    const app = document.querySelector('#experiment');
+    const reflection = document.querySelector('#reflection');
+    const toast = document.querySelector('#toast');
+    const cards = [...document.querySelectorAll('.task-card')];
+    const visited = new Set();
+    let activeTask = null;
+    let pendingTask = null;
+    const floatingNote = document.querySelector('#floatingNote');
+
+    function showApp() {
+      app.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+
+    function makeNodes(target, labels, translated) {
+      target.innerHTML = '';
+      labels.forEach((label, index) => {
+        const node = document.createElement('span');
+        node.className = 'node' + (translated && (label.includes('translation') || label.includes('service') || label.includes('interface')) ? ' translation-layer' : '');
+        node.style.setProperty('--i', index * 2);
+        node.textContent = label;
+        target.appendChild(node);
+        if (index < labels.length - 1) {
+          const arrow = document.createElement('span');
+          arrow.className = 'arrow'; arrow.style.setProperty('--i', index * 2 + 1); arrow.textContent = '→';
+          target.appendChild(arrow);
+        }
+      });
+    }
+
+    function reveal(taskKey) {
+      const task = tasks[taskKey];
+      activeTask = taskKey;
+      cards.forEach(card => card.classList.toggle('active', card.dataset.task === taskKey));
+      document.querySelector('#annotationTitle').textContent = task.title;
+      document.querySelector('#annotationCopy').textContent = task.copy;
+      document.querySelector('#resultBox').innerHTML = '<b>Shared result</b>' + task.result;
+      document.querySelector('#takeaway').textContent = task.takeaway;
+      makeNodes(document.querySelector('#directNodes'), task.direct, false);
+      makeNodes(document.querySelector('#translatedNodes'), task.translated, true);
+      document.querySelectorAll('.chain').forEach(chain => { chain.classList.remove('play'); void chain.offsetWidth; chain.classList.add('play'); });
+
+      visited.add(taskKey);
+      cards.find(card => card.dataset.task === taskKey).classList.add('visited');
+      document.querySelector('#visitedCount').textContent = visited.size;
+      document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+        dot.classList.toggle('done', i < visited.size);
+        dot.classList.toggle('current', i === visited.size && visited.size < 4);
+      });
+      if (visited.size === 4) document.querySelector('#reflectionBtn').classList.add('ready');
+    }
+
+    function runTask(taskKey) {
+      const task = tasks[taskKey];
+      pendingTask = taskKey;
+      document.querySelector('#modalTitle').textContent = task.title;
+      document.querySelector('#modalCopy').textContent = task.modal;
+      document.querySelector('#modalSymbol').textContent = task.symbol;
+      document.querySelector('#modalStatus').textContent = 'Result represented. Continue when ready.';
+      toast.classList.add('show');
+      document.querySelector('#modalContinue').focus();
+    }
+
+    cards.forEach(card => card.addEventListener('click', () => runTask(card.dataset.task)));
+    document.querySelector('#modalContinue').addEventListener('click', () => {
+      if (!pendingTask) return;
+      toast.classList.remove('show');
+      reveal(pendingTask);
+      pendingTask = null;
+    });
+    document.querySelectorAll('[data-inspect]').forEach(element => {
+      const showNote = event => {
+        floatingNote.querySelector('span').textContent = element.dataset.inspect;
+        const desktop = document.querySelector('.harmony-desktop');
+        const box = desktop.getBoundingClientRect();
+        const target = element.getBoundingClientRect();
+        const x = Math.min(Math.max(target.left - box.left, 16), box.width - 296);
+        const y = Math.min(target.bottom - box.top + 10, box.height - 120);
+        floatingNote.style.left = x + 'px'; floatingNote.style.top = y + 'px';
+        floatingNote.classList.add('show');
+      };
+      element.addEventListener('mouseenter', showNote);
+      element.addEventListener('focus', showNote);
+      element.addEventListener('mouseleave', () => floatingNote.classList.remove('show'));
+      element.addEventListener('blur', () => floatingNote.classList.remove('show'));
+      element.addEventListener('click', event => { if (!element.classList.contains('task-card')) { event.preventDefault(); showNote(event); } });
+    });
+    document.querySelectorAll('[data-theory]').forEach(button => {
+      const original = document.querySelector('#takeaway').textContent;
+      const showTheory = () => { document.querySelector('#takeaway').textContent = button.dataset.theory; };
+      button.addEventListener('mouseenter', showTheory); button.addEventListener('focus', showTheory);
+      button.addEventListener('mouseleave', () => { if (!activeTask) document.querySelector('#takeaway').textContent = original; else document.querySelector('#takeaway').textContent = tasks[activeTask].takeaway; });
+      button.addEventListener('blur', () => { if (!activeTask) document.querySelector('#takeaway').textContent = original; else document.querySelector('#takeaway').textContent = tasks[activeTask].takeaway; });
+    });
+    document.querySelector('#reflectionBtn').addEventListener('click', () => {
+      reflection.scrollIntoView({ behavior: 'auto', block: 'start' });
+    });
+    document.querySelector('#restartBtn').addEventListener('click', () => intro.scrollIntoView({ behavior: 'auto', block: 'start' }));
+    document.querySelectorAll('.verdict-choice').forEach(button => button.addEventListener('click', () => {
+      const aligned = button.dataset.choice === 'aligned';
+      document.querySelector('#verdictAnswer').innerHTML = aligned
+        ? '<strong>Yes — but not entirely.</strong> It is better when the task requires inspectability, open-ended composition, local authority, or work the system designer did not anticipate. It is not automatically better when coherence, safety, maintenance, and cross-device continuity matter more.'
+        : '<strong>Yes — but not entirely.</strong> It is better when the task requires coherence, managed permission, low friction, and continuity across devices. It is not automatically better when the user must inspect underlying structures, combine arbitrary tools, or invent operations outside approved paths.';
+      document.querySelector('#verdictAnswer').classList.add('show');
+    }));
+    document.querySelector('#systemRange').addEventListener('input', event => {
+      const value = Number(event.target.value);
+      const output = document.querySelector('#spectrumOutput');
+      if (value < 34) output.innerHTML = '<b>OBJECT-DOMINANT POSITION</b>User actions map visibly to files, programs, processes, and devices. Legibility and recombination increase; so do complexity and user responsibility.';
+      else if (value > 66) output.innerHTML = '<b>EXPERIENCE-DOMINANT POSITION</b>User intentions are translated into coordinated services and outcomes. Coherence and protection increase; underlying causality becomes less available.';
+      else output.innerHTML = '<b>HYBRID POSITION</b>The user sees some operative objects, while services translate other actions into managed outcomes.';
+    });
+    document.querySelectorAll('.claim-toggle').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('.claim-toggle').forEach(item => item.classList.toggle('active', item === button));
+      document.querySelector('#claimResponse').textContent = button.dataset.claim === 'function'
+        ? 'Function is necessary evidence: if an environment can store, compute, communicate, and coordinate devices, it acts as a system. But functional equivalence alone does not reveal the authority, visibility, or composability available to its user.'
+        : 'Relations reveal the philosophy of use: which objects remain visible, which actions require translation, and who can invent new combinations. But relations alone should not erase the real benefits of safety, coherence, and accessibility.';
+    }));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && toast.classList.contains('show') && pendingTask) document.querySelector('#modalContinue').click();
+    });
+
+    const now = new Date();
+    document.querySelector('#clock').textContent = now.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit', hour12:false});
+    document.querySelector('#dateText').textContent = now.toLocaleDateString('en-GB', {day:'numeric', month:'long'});
+  </script>
+</body>
+</html>
