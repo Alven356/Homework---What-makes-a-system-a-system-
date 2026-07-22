@@ -1,3 +1,18 @@
+# Behavior Improved & Update Journal
+
+## B1 — Reframing the Project Around Its Research Question
+
+During the development process, I recognised that the project needed to place greater emphasis on its research argument rather than on the number or complexity of its interactive features. I therefore redirected the project toward the philosophy of operating systems and the central question:
+
+> What makes a system a system?
+
+To support this shift, I used AI-assisted iteration to reduce decorative elements such as rounded corners, glowing effects, excessive animation, and visually prominent interface components. These changes allowed the content and theoretical argument to become the primary focus of the work.
+
+I also consolidated the previously separated screens into a single continuous article. The sections were given a more consistent reading width, while unnecessary dividing lines and visual interruptions were reduced. This created a more coherent reading experience and helped the interactive elements function as evidence within the paper rather than as independent demonstrations.
+
+Finally, I removed or simplified animations that made the project feel overly playful or application-like. The remaining interactions now serve specific analytical purposes: they reveal annotations, compare system logic, and support the paper’s argument. This revision helped transform the project from an interactive showcase into a more focused and formal interactive research paper.
+
+
 # What Makes a System a System?
 
 An English-language interactive paper about the definition of a system and the philosophies through which a system can be used.
