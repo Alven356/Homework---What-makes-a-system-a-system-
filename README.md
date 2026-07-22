@@ -1,8 +1,10 @@
-Homework Report
---------------------------------------------------
-# Behavior Improved & Update Journal
+# Homework Report
 
-## B1 — Reframing the Project Around Its Research Question
+> **Journal note:** Within the **Behavior Improved & Update Journal**, entries are labelled sequentially as B1, B2, and so forth. The entry with the highest number represents the most recent development. This journal does not only document revisions to the project; it also records the work completed for this assignment and the guidance, expectations, and areas for improvement identified by the instructor.
+
+## Behavior Improved & Update Journal
+
+### B1 — Reframing the Project Around Its Research Question
 
 During the development process, I recognised that the project needed to place greater emphasis on its research argument rather than on the number or complexity of its interactive features. I therefore redirected the project toward the philosophy of operating systems and the central question:
 
@@ -14,14 +16,23 @@ I also consolidated the previously separated screens into a single continuous ar
 
 Finally, I removed or simplified animations that made the project feel overly playful or application-like. The remaining interactions now serve specific analytical purposes: they reveal annotations, compare system logic, and support the paper’s argument. This revision helped transform the project from an interactive showcase into a more focused and formal interactive research paper.
 
-Project Content
-------------------------------------------------------
+### B2 — Clarifying the Central Question and the Next Minimum Version
 
-# What Makes a System a System?
+Through the interactions in this Paper App, I want visitors to consider a central question:
+
+> If machine logic is no longer the user’s primary logic, is it still a system?
+
+The interesting point is that the two models are based on different philosophies of use, but this difference does not prevent either of them from being a system. Instead, it changes their functions and core principles as systems. One model treats **the machine as an operable environment**, while the other treats **the machine as a coordinated experience**.
+
+The next minimum version will improve the visualisation of the system’s underlying logic chains. It will explain the operational relationships among devices in greater depth, rather than limiting the comparison to their visible interfaces or surface-level behaviour.
+
+## Project Content
+
+### What Makes a System a System?
 
 An English-language interactive paper about the definition of a system and the philosophies through which a system can be used.
 
-## Guiding question
+#### Guiding question
 
 A conventional general-purpose computer lets users act through concepts that remain relatively close to its operating structure: files, directories, programs, processes, runtimes, and devices. An experience-oriented or HarmonyOS-inspired environment instead treats the user's intended activity as its primary logic. Apps, cards, services, permissions, and cross-device tasks translate the system's underlying structures into a coherent experience.
 
@@ -38,7 +49,7 @@ The retained core proposition is:
 
 > The same user experience does not imply the same system logic. One system lets the user operate along the machine's logic; the other translates the machine's logic into an experience.
 
-## Reading direction
+#### Reading direction
 
 The webpage proceeds as one continuous, long-form interactive essay rather than as a functional desktop, a landing page, or a sequence of disconnected screens. Its structure follows an academic reading page: abstract, working definitions, developed argument, marginal notes, interactive figures, exhibits, counterargument, conclusion, and scope notes. The essay remains the primary structure: interactions appear as numbered evidence inside the argument rather than the article being wrapped around an application interface.
 
@@ -53,7 +64,7 @@ On wide screens, Contents and Margin Notes remain as balanced, sticky reading ai
 
 Additional interactive figures let the reader move between object-dominant and experience-dominant system positions, and test two partial definitions: a system as what it can do, and a system as how it permits those actions to occur.
 
-## Two philosophies of use
+#### Two philosophies of use
 
 The **logic-aligned philosophy** treats the system as an inspectable computational environment. A user is expected to encounter, understand, and combine operative objects. System power appears as the ability to enter the machine's structures and produce functions that were not necessarily anticipated in advance.
 
@@ -61,18 +72,18 @@ The **experience-translated philosophy** treats the system as an organiser of in
 
 The second model is not “less of a system.” It relocates system legibility and agency away from the user's direct operating model and into the framework that interprets the user's intent. That relocation creates genuine benefits and genuine limits.
 
-## Benefits and costs
+#### Benefits and costs
 
-### Logic-aligned systems
+##### Logic-aligned systems
 
 Benefits include inspectability, local authority, extensibility, tool composition, automation, and the possibility of uses not anticipated by the system designer. Costs include conceptual complexity, maintenance burden, inconsistency, and greater responsibility for errors and security.
 
-### Experience-translated systems
+##### Experience-translated systems
 
 Benefits include coherence, safety, managed permissions, low-friction operation, and continuity across applications and devices. Costs include reduced visibility into underlying structures, stronger dependence on approved interfaces, and fewer opportunities for arbitrary recombination.
 
 Neither category is absolute. Existing operating systems often mix both approaches. The comparison is a conceptual lens for asking what a system exposes, what it translates, and what forms of control a particular situation requires.
 
-## Running the project
+#### Running the project
 
 Open `index.html` in a modern browser. The project is a single-file static site with no API, external dependency, build step, or real system access. It is suitable for static hosting such as GitHub Pages.
