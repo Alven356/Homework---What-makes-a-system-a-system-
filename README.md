@@ -26,6 +26,10 @@ The interesting point is that the two models are based on different philosophies
 
 The next minimum version will improve the visualisation of the system’s underlying logic chains. It will explain the operational relationships among devices in greater depth, rather than limiting the comparison to their visible interfaces or surface-level behaviour.
 
+### B3  — What it told me and how I checked, a real result
+
+AI told me that my app created a fake environment, the can choose an object in order to reveal two possible paths, including a logic-aligned and experience-translated system. When I'm checking it, truly we can see a system-like ui in the middle of the article, and once we click on different parts, image and devices, we can see two differet system line maps of how it runs inside the system. That is how it reveals two possible paths. 
+
 ## Project Content
 
 ### What Makes a System a System?
