@@ -30,6 +30,15 @@ The next minimum version will improve the visualisation of the system’s underl
 
 AI told me that my app created a fake environment, the can choose an object in order to reveal two possible paths, including a logic-aligned and experience-translated system. When I'm checking it, truly we can see a system-like ui in the middle of the article, and once we click on different parts, image and devices, we can see two differet system line maps of how it runs inside the system. That is how it reveals two possible paths. 
 
+### B4  — What's next
+
+Since this project of mine is almost finished
+The new repo for the rest of the class will be one of the projects I've been working on for a long time.
+That is Core Aesthetic, I had done three months' research and thinking to discuss with this topic for my school project.
+And now, I'm going to publish it and really make it easier to understand and add more interactive elements.
+The content will be the aesthetic classification and definition, but as a paperapp, I will make it focus more on content than interactive elements.
+I will only place interactive elements when it is necessary.
+
 ## Project Content
 
 ### What Makes a System a System?
